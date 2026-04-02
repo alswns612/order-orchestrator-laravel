@@ -1,29 +1,29 @@
 # Order Orchestrator (Laravel)
 
-Event-driven order processing system built with **Laravel** — demonstrating Saga pattern, Outbox pattern, and comprehensive operational reliability for e-commerce domains.
+**Laravel** 기반의 이벤트 주도 주문 처리 시스템 — 이커머스 도메인에서의 Saga 패턴, Outbox 패턴, 운영 안정성을 시연합니다.
 
-## Tech Stack
+## 기술 스택
 
-- **Backend**: PHP 8.3 / Laravel 12
-- **Database**: MySQL 8.0
-- **Cache & Queue**: Redis 7
-- **Search**: Elasticsearch 8.x
-- **Infrastructure**: Docker Compose
-- **Frontend**: Vue 3 (Admin Dashboard)
+- **백엔드**: PHP 8.4 / Laravel 12
+- **데이터베이스**: MySQL 8.0
+- **캐시 & 큐**: Redis 7
+- **검색**: Elasticsearch 8.x
+- **인프라**: Docker Compose
+- **프론트엔드**: Vue 3 (관리자 대시보드)
 
-## Architecture
+## 아키텍처
 
 ```mermaid
 graph TB
-    Client[Client] --> Nginx[Nginx :8080]
-    Nginx --> App[Laravel App - PHP-FPM]
+    Client[클라이언트] --> Nginx[Nginx :8080]
+    Nginx --> App[Laravel 앱 - PHP-FPM]
     App --> MySQL[(MySQL)]
     App --> Redis[(Redis)]
     App --> ES[(Elasticsearch)]
 
-    Scheduler[Scheduler] --> |poll outbox| MySQL
-    QueueWorker[Queue Worker] --> |process jobs| Redis
-    QueueWorker --> |saga steps| MySQL
+    Scheduler[스케줄러] --> |아웃박스 폴링| MySQL
+    QueueWorker[큐 워커] --> |잡 처리| Redis
+    QueueWorker --> |사가 스텝 실행| MySQL
 
     subgraph Docker Compose
         Nginx
@@ -36,30 +36,30 @@ graph TB
     end
 ```
 
-### Core Patterns
+### 핵심 패턴
 
-- **Order State Machine**: `PENDING → PAID → SHIPPED` with strict transition validation
-- **Saga Orchestrator**: Multi-step order fulfillment with compensating transactions on failure
-- **Outbox Pattern**: Reliable event publishing with retry + exponential backoff
-- **Dead Letter Queue**: Failed events management with admin reprocessing
+- **주문 상태 머신**: `PENDING → PAID → SHIPPED` 엄격한 상태 전이 검증
+- **사가 오케스트레이터**: 다단계 주문 처리 + 실패 시 보상 트랜잭션
+- **아웃박스 패턴**: 지수 백오프를 통한 안정적인 이벤트 발행
+- **데드 레터 큐**: 실패 이벤트 관리 및 관리자 재처리
 
-## Getting Started
+## 시작하기
 
-### Prerequisites
+### 사전 요구사항
 
 - Docker & Docker Compose
 
-### Setup
+### 설치
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/order-orchestrator-laravel.git
+# 저장소 클론
+git clone https://github.com/alswns612/order-orchestrator-laravel.git
 cd order-orchestrator-laravel
 
-# Start everything (first time)
+# 최초 설치 (한 번만 실행)
 make setup
 
-# Or manually:
+# 또는 수동으로:
 docker compose build
 docker compose run --rm app composer install
 docker compose run --rm app cp -n .env.example .env
@@ -68,53 +68,53 @@ docker compose up -d
 docker compose exec app php artisan migrate
 ```
 
-### Access
+### 접속 정보
 
-| Service         | URL                        |
+| 서비스           | URL                        |
 |-----------------|----------------------------|
 | API             | http://localhost:8080       |
-| API Docs        | http://localhost:8080/api/documentation |
+| API 문서         | http://localhost:8080/api/documentation |
 | MySQL           | localhost:3306              |
 | Redis           | localhost:6379              |
 | Elasticsearch   | localhost:9200              |
 
-### Useful Commands
+### 주요 명령어
 
 ```bash
-make up          # Start containers
-make down        # Stop containers
-make shell       # Shell into app container
-make test        # Run tests
-make fresh       # Fresh migration + seed
-make logs        # View logs
-make mysql       # MySQL CLI
-make redis       # Redis CLI
+make up          # 컨테이너 시작
+make down        # 컨테이너 중지
+make shell       # 앱 컨테이너 쉘 접속
+make test        # 테스트 실행
+make fresh       # 마이그레이션 초기화 + 시드
+make logs        # 로그 확인
+make mysql       # MySQL CLI 접속
+make redis       # Redis CLI 접속
 ```
 
-## API Endpoints
+## API 엔드포인트
 
-### Public
+### 공개 API
 
-| Method | Endpoint                | Description               |
-|--------|-------------------------|---------------------------|
-| POST   | /api/v1/orders          | Create order              |
-| GET    | /api/v1/orders/{id}     | Get order details         |
-| PATCH  | /api/v1/orders/{id}/status | Update order status    |
-| GET    | /api/v1/orders/search   | Search orders (ES)        |
+| 메서드  | 엔드포인트                  | 설명               |
+|--------|-------------------------|---------------------|
+| POST   | /api/v1/orders          | 주문 생성            |
+| GET    | /api/v1/orders/{id}     | 주문 상세 조회        |
+| PATCH  | /api/v1/orders/{id}/status | 주문 상태 변경     |
+| GET    | /api/v1/orders/search   | 주문 검색 (ES)       |
 
-### Admin
+### 관리자 API
 
-| Method | Endpoint                          | Description                |
-|--------|-----------------------------------|----------------------------|
-| POST   | /api/v1/admin/orders/{id}/reprocess | Reprocess failed order   |
-| POST   | /api/v1/admin/orders/{id}/force-status | Force status change   |
-| GET    | /api/v1/admin/orders/{id}/audit-logs | Get audit trail         |
-| GET    | /api/v1/admin/outbox/pending      | List pending events        |
-| POST   | /api/v1/admin/outbox/dispatch     | Manual dispatch            |
-| GET    | /api/v1/admin/outbox/dlq          | List DLQ events            |
-| POST   | /api/v1/admin/outbox/dlq/{id}/reprocess | Reprocess DLQ event |
+| 메서드  | 엔드포인트                               | 설명                |
+|--------|----------------------------------------|---------------------|
+| POST   | /api/v1/admin/orders/{id}/reprocess    | 실패 주문 재처리      |
+| POST   | /api/v1/admin/orders/{id}/force-status | 상태 강제 변경        |
+| GET    | /api/v1/admin/orders/{id}/audit-logs   | 감사 로그 조회        |
+| GET    | /api/v1/admin/outbox/pending           | 대기 중인 이벤트 조회  |
+| POST   | /api/v1/admin/outbox/dispatch          | 수동 디스패치         |
+| GET    | /api/v1/admin/outbox/dlq              | DLQ 이벤트 조회       |
+| POST   | /api/v1/admin/outbox/dlq/{id}/reprocess | DLQ 이벤트 재처리   |
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 app/
@@ -125,19 +125,19 @@ app/
 │   │       └── Admin/
 │   │           ├── AdminOrderController.php
 │   │           └── OutboxAdminController.php
-│   ├── Requests/          # Form validation
-│   └── Resources/         # API response formatting
-├── Models/                # Eloquent models
-├── Services/              # Business logic
+│   ├── Requests/          # 폼 유효성 검증
+│   └── Resources/         # API 응답 포맷
+├── Models/                # Eloquent 모델
+├── Services/              # 비즈니스 로직
 │   ├── OrderStateMachine.php
 │   ├── SagaOrchestrator.php
 │   ├── OutboxProcessor.php
 │   └── ElasticsearchService.php
-├── Enums/                 # OrderStatus, PaymentStatus, etc.
-├── Events/                # Domain events
-└── Jobs/                  # Queue jobs
+├── Enums/                 # OrderStatus, PaymentStatus 등
+├── Events/                # 도메인 이벤트
+└── Jobs/                  # 큐 잡
 ```
 
-## License
+## 라이선스
 
 MIT
